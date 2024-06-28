@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["ESNext"],
@@ -33,11 +32,7 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true,
-
-    "types": [
-      "bun-types" // add Bun global
-    ]
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]

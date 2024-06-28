@@ -2,12 +2,14 @@
   "name": "@fullstack-monorepo/app",
   "type": "module",
   "scripts": {
-    "dev": "vite"
+    "dev": "vite",
+    "build": "tsc -b && vite build --emptyOutDir"
   },
   "dependencies": {
+    "@fullstack-monorepo/lib": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@fullstack-monorepo/lib": "workspace:*"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.8",
@@ -19,7 +21,6 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.5.2",
-    "vite": "^5.3.1",
-    "bun-types": "^1.1.17"
+    "vite": "^5.3.1"
   }
 }

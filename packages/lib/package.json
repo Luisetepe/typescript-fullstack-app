@@ -3,7 +3,5 @@
   "type": "module",
   "scripts": {},
   "dependencies": {},
-  "devDependencies": {
-    "bun-types": "^1.1.17"
-  }
+  "devDependencies": {}
 }
