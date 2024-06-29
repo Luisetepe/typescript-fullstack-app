@@ -2,8 +2,8 @@
   "name": "@fullstack-monorepo/app",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build --emptyOutDir"
+    "dev": " bun run --bun vite",
+    "build": "bun run --bun tsc -b && bun run --bun vite build --emptyOutDir"
   },
   "dependencies": {
     "@fullstack-monorepo/lib": "workspace:*",

@@ -3,16 +3,30 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/main.ts",
-    "build": "bun run build.ts"
+    "build": "bun run build.ts",
+    "db:migration": "env-cmd -f ./.env.local drizzle-kit generate --config=./src/infrastructure/db/migrations.ts",
+    "db:apply": "env-cmd -f ./.env.local drizzle-kit migrate --config=./src/infrastructure/db/migrations.ts",
+    "db:show": "env-cmd -f ./.env.local drizzle-kit studio --config=./src/infrastructure/db/migrations.ts"
   },
   "dependencies": {
     "@fullstack-monorepo/lib": "workspace:*",
+    "@hono/zod-validator": "^0.2.2",
+    "@lucia-auth/adapter-drizzle": "^1.0.7",
+    "@myty/jimmy": "^0.6.2",
+    "@node-rs/argon2": "^1.8.3",
+    "drizzle-orm": "^0.31.2",
     "hono": "^4.4.8",
+    "lucia": "^3.2.0",
+    "oslo": "^1.2.1",
+    "postgres": "^3.4.4",
+    "xid-ts": "^1.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/bun": "^1.1.5",
     "@types/node": "^20.14.8",
+    "drizzle-kit": "^0.22.7",
+    "env-cmd": "^10.1.0",
     "typescript": "^5.5.2"
   }
 }

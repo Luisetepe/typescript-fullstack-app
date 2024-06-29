@@ -8,7 +8,10 @@
     "deps": "bun install && bun install --cwd ./packages/app && bun install --cwd ./packages/api && bun install --cwd ./packages/lib",
     "build:app": "bun run --cwd ./packages/app build",
     "build:api": "bun run --cwd ./packages/api build",
-    "build": "bun run build:app && bun run build:api"
+    "build": "bun run build:app && bun run build:api",
+    "db:migration": "bun run --cwd ./packages/api db:migration",
+    "db:apply": "bun run --cwd ./packages/api db:apply",
+    "db:show": "bun run --cwd ./packages/api db:show"
   },
   "workspaces": [
     "packages/api",
