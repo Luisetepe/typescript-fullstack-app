@@ -1,11 +1,19 @@
 To install dependencies:
+
 ```sh
-bun install
+bun run deps
 ```
 
-To run:
+To run backend api:
+
 ```sh
-bun run dev
+bun run dev:api
+```
+
+To run frontend app:
+
+```sh
+bun run dev:app
 ```
 
 open http://localhost:3000
