@@ -28,5 +28,9 @@
     "drizzle-kit": "^0.22.7",
     "env-cmd": "^10.1.0",
     "typescript": "^5.5.2"
+  },
+  "engines": {
+    "bun": "^1.1.17",
+    "node": ">=20.0.0"
   }
 }
