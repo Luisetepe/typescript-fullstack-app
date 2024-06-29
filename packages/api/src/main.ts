@@ -1,8 +1,7 @@
 import type { Context } from '@/context'
 import { AppAuthController } from '@/controllers/app/auth'
 import { env } from '@/env'
-import { luciaAuthClient } from '@/infrastructure/auth/client'
-import { AuthService } from '@/infrastructure/auth/service'
+import { LuciaAuthService } from '@/infrastructure/auth/service'
 import { CryptoService } from '@/infrastructure/crypto/service'
 import { SessionCookieMiddleware } from '@/infrastructure/middlewares/sessionCookie'
 import mediator from '@/mediator'
@@ -10,7 +9,7 @@ import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 
 //* Dependency building
-const authService = new AuthService(luciaAuthClient)
+const authService = new LuciaAuthService()
 const cryptoService = new CryptoService()
 
 //* ----------------Configure api server----------------
