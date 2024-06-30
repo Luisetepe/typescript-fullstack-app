@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Fullstack Typescript",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
