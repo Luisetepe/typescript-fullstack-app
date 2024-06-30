@@ -1,8 +1,7 @@
-import type { Context } from '@/context'
-import { CheckUserLoginQuery } from '@/features/user/checkUserLogin'
-import { SignUpUserCommand } from '@/features/user/signUpUser'
+import { CheckUserLoginQuery } from '@/features/auth/checkUserLogin'
+import { SignUpUserCommand } from '@/features/auth/signUpUser'
 import type { IAuthService } from '@/infrastructure/auth/service'
-import type { ICryptoService } from '@/infrastructure/crypto/service'
+import type { Context } from '@/utils/types/context'
 import {
   loginRequestSchema,
   signUpRequestSchema,
@@ -13,8 +12,7 @@ import { Hono } from 'hono'
 
 export function AppAuthController(
   mediator: Mediator,
-  authService: IAuthService,
-  cryptoService: ICryptoService
+  authService: IAuthService
 ) {
   const app = new Hono<Context>()
 
@@ -27,20 +25,15 @@ export function AppAuthController(
 
     const { email, password } = c.req.valid('json')
 
-    const existingUser = await mediator.send(new CheckUserLoginQuery(email))
-    if (!existingUser) {
-      return c.json({ message: 'Invalid user or password' }, 401)
+    const result = await mediator.send(new CheckUserLoginQuery(email, password))
+
+    const { body, status, success } = result.toApiResponse()
+
+    if (!success) {
+      return c.json(body, status)
     }
 
-    const validPassword = await cryptoService.verifyPassword(
-      password,
-      existingUser.password
-    )
-    if (!validPassword) {
-      return c.json({ message: 'Invalid user or password' }, 401)
-    }
-
-    const session = await authService.createSession(existingUser.id, {})
+    const session = await authService.createSession(result.value!.id, {})
     c.header(
       'Set-Cookie',
       authService.createSessionCookie(session.id).serialize(),
@@ -49,22 +42,19 @@ export function AppAuthController(
       }
     )
 
-    return c.body(null, 204)
+    return c.json(body, status)
   })
 
   //* POST /app/auth/signup
   app.post('/signup', zValidator('json', signUpRequestSchema), async (c) => {
     const { name, email, password } = c.req.valid('json')
 
-    const existingUser = await mediator.send(new CheckUserLoginQuery(email))
-    if (existingUser) {
-      return c.json({ message: 'Invalid new user info' }, 400)
-    }
+    const result = await mediator.send(
+      new SignUpUserCommand(name, email, password)
+    )
+    const { body, status } = result.toApiResponse()
 
-    const passwordHash = await cryptoService.hashPassword(password)
-
-    await mediator.send(new SignUpUserCommand(name, email, passwordHash))
-    return c.body(null, 201)
+    return c.json(body, status)
   })
 
   //* POST /app/auth/logout

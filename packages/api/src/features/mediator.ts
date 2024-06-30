@@ -1,17 +1,29 @@
 import {
   CheckUserLoginQuery,
   CheckUserLoginQueryHandler,
-} from '@/features/user/checkUserLogin'
+} from '@/features/auth/checkUserLogin'
 import {
   SignUpUserCommand,
   SignUpUserCommandHandler,
-} from '@/features/user/signUpUser'
-import { dbContext } from '@/infrastructure/db/context'
+} from '@/features/auth/signUpUser'
+import type { ICryptoService } from '@/infrastructure/crypto/service'
+import type { DbContext } from '@/infrastructure/db/context'
 import { Mediator } from '@myty/jimmy'
 
-const mediator = new Mediator()
+export function CreateMediator(
+  dbContext: DbContext,
+  cryptoService: ICryptoService
+) {
+  const mediator = new Mediator()
 
-mediator.handle(CheckUserLoginQuery, CheckUserLoginQueryHandler(dbContext))
-mediator.handle(SignUpUserCommand, SignUpUserCommandHandler(dbContext))
+  mediator.handle(
+    CheckUserLoginQuery,
+    CheckUserLoginQueryHandler(dbContext, cryptoService)
+  )
+  mediator.handle(
+    SignUpUserCommand,
+    SignUpUserCommandHandler(dbContext, cryptoService)
+  )
 
-export default mediator
+  return mediator
+}
