@@ -20,27 +20,31 @@ export function SignUpUserCommandHandler(
   cryptoService: ICryptoService
 ) {
   return async function (command: SignUpUserCommand) {
-    const user = await dbContext.query.USER_TABLE.findFirst({
-      columns: {
-        id: true,
-        email: true,
-        password: true,
-      },
-      where: (users, { eq }) => eq(users.email, command.email),
-    })
+    try {
+      const user = await dbContext.query.USER_TABLE.findFirst({
+        columns: {
+          id: true,
+          email: true,
+          password: true,
+        },
+        where: (users, { eq }) => eq(users.email, command.email),
+      })
 
-    if (!user) {
-      return Result.Invalid([{ field: 'email', messages: 'Invalid email' }])
+      if (!user) {
+        return Result.Invalid([{ field: 'email', messages: 'Invalid email.' }])
+      }
+
+      const passwordHash = await cryptoService.hashPassword(command.password)
+      await dbContext.insert(USER_TABLE).values({
+        id: new Xid().toString(),
+        name: command.name,
+        email: command.email,
+        password: passwordHash,
+      })
+
+      return Result.Created()
+    } catch (error) {
+      return Result.CriticalError('Failed to sign up user.')
     }
-
-    const passwordHash = await cryptoService.hashPassword(command.password)
-    await dbContext.insert(USER_TABLE).values({
-      id: new Xid().toString(),
-      name: command.name,
-      email: command.email,
-      password: passwordHash,
-    })
-
-    return Result.Created()
   }
 }

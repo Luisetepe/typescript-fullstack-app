@@ -1,6 +1,7 @@
-import { CheckUserLoginQuery } from '@/features/auth/checkUserLogin'
+import { CreateBlankSessionCookieCommand } from '@/features/auth/createBlankSessionCookie'
+import { CreateUserSessionCookieCommand } from '@/features/auth/createUserSessionCookie'
+import { InvalidateUserSessionCommand } from '@/features/auth/invalidateUserSession'
 import { SignUpUserCommand } from '@/features/auth/signUpUser'
-import type { IAuthService } from '@/infrastructure/auth/service'
 import type { Context } from '@/utils/types/context'
 import {
   loginRequestSchema,
@@ -10,10 +11,7 @@ import { zValidator } from '@hono/zod-validator'
 import type { Mediator } from '@myty/jimmy'
 import { Hono } from 'hono'
 
-export function AppAuthController(
-  mediator: Mediator,
-  authService: IAuthService
-) {
+export function AppAuthController(mediator: Mediator) {
   const app = new Hono<Context>()
 
   //* POST /app/auth/login
@@ -25,24 +23,17 @@ export function AppAuthController(
 
     const { email, password } = c.req.valid('json')
 
-    const result = await mediator.send(new CheckUserLoginQuery(email, password))
-
-    const { body, status, success } = result.toApiResponse()
-
-    if (!success) {
-      return c.json(body, status)
+    const result = await mediator.send(
+      new CreateUserSessionCookieCommand(email, password)
+    )
+    // Set session cookie if login is successful
+    if (result.isSuccess()) {
+      c.header('Set-Cookie', result.value!.serialize(), {
+        append: true,
+      })
     }
 
-    const session = await authService.createSession(result.value!.id, {})
-    c.header(
-      'Set-Cookie',
-      authService.createSessionCookie(session.id).serialize(),
-      {
-        append: true,
-      }
-    )
-
-    return c.json(body, status)
+    return c.body(null, 200)
   })
 
   //* POST /app/auth/signup
@@ -52,9 +43,8 @@ export function AppAuthController(
     const result = await mediator.send(
       new SignUpUserCommand(name, email, password)
     )
-    const { body, status } = result.toApiResponse()
 
-    return c.json(body, status)
+    return result.toApiResponse()
   })
 
   //* POST /app/auth/logout
@@ -64,10 +54,22 @@ export function AppAuthController(
       return c.json({ message: 'Unauthorized' }, 401)
     }
 
-    await authService.invalidateSession(session.id)
-    c.header('Set-Cookie', authService.createBlankSessionCookie().serialize())
+    const invalidationResult = await mediator.send(
+      new InvalidateUserSessionCommand(session.id)
+    )
+    if (!invalidationResult.isSuccess()) {
+      return invalidationResult.toApiResponse()
+    }
 
-    return c.body(null, 204)
+    const blankCookieResult = await mediator.send(
+      new CreateBlankSessionCookieCommand()
+    )
+    // Clear session cookie if logout is successful, by setting an empty cookie
+    if (blankCookieResult.isSuccess()) {
+      c.header('Set-Cookie', blankCookieResult.value!.serialize())
+    }
+
+    return c.body(null, 200)
   })
 
   //* GET /app/auth/check

@@ -1,5 +1,3 @@
-import type { StatusCode } from 'hono/utils/http-status'
-
 export enum ResultStatus {
   Ok,
   Created,
@@ -19,21 +17,21 @@ export type ValidationError = {
   messages: string[] | string
 }
 
-export class Result<T = void> {
-  private _value?: T extends void ? never : T
+export class Result<T = null> {
+  private _value: T | null
   private _status: ResultStatus
 
-  private _errors: string[] = []
+  private _errorMessage: string
   private _validationErrors: ValidationError[] = []
 
-  get value(): T | undefined {
+  get value(): T | null {
     return this._value
   }
   get status(): ResultStatus {
     return this._status
   }
-  get errors(): string[] {
-    return this._errors
+  get errorMessage(): string {
+    return this._errorMessage
   }
   get validationErrors(): ValidationError[] {
     return this._validationErrors
@@ -43,66 +41,73 @@ export class Result<T = void> {
     this._status = status
   }
 
-  static Success<T>(value?: T extends void ? never : T): Result<T> {
+  static Success<T = null>(value: T | null = null): Result<T> {
     const result = new Result<T>(ResultStatus.Ok)
     result._value = value
 
     return result
   }
-  static Created<T = void>(value?: T): Result<T> {
+  static Created<T = null>(value: T | null = null): Result<T> {
     const result = new Result<T>(ResultStatus.Created)
     result._value = value
 
     return result
   }
-  static Error<T = void>(message: string): Result<T> {
+  static Error<T = null>(errorMessage?: string): Result<T> {
     const result = new Result<T>(ResultStatus.Error)
-    result._errors = [message]
+    result._errorMessage =
+      errorMessage ?? 'The data provided could not be processed.'
 
     return result
   }
-  static Forbidden<T = void>(errorMessages: string[] = []): Result<T> {
+  static Forbidden<T = null>(errorMessage?: string): Result<T> {
     const result = new Result<T>(ResultStatus.Forbidden)
-    result._errors = errorMessages
+    result._errorMessage =
+      errorMessage ?? 'Insufficient permissions to perform this action.'
 
     return result
   }
-  static Unauthorized<T = void>(errorMessages: string[] = []): Result<T> {
+  static Unauthorized<T = null>(errorMessage?: string): Result<T> {
     const result = new Result<T>(ResultStatus.Unauthorized)
-    result._errors = errorMessages
+    result._errorMessage =
+      errorMessage ?? 'You are not authorized to perform this action.'
 
     return result
   }
-  static Invalid<T = void>(validationErrors: ValidationError[]): Result<T> {
+  static Invalid<T = null>(validationErrors: ValidationError[]): Result<T> {
     const result = new Result<T>(ResultStatus.Invalid)
+    result._errorMessage = 'One or more validation errors ocurred.'
     result._validationErrors = validationErrors
 
     return result
   }
-  static NotFound<T = void>(errorMessages: string[] = []): Result<T> {
+  static NotFound<T = null>(errorMessage?: string): Result<T> {
     const result = new Result<T>(ResultStatus.NotFound)
-    result._errors = errorMessages
+    result._errorMessage =
+      errorMessage ?? 'Resource requested could not be found.'
 
     return result
   }
-  static NoContent<T = void>(): Result<T> {
+  static NoContent<T = null>(): Result<T> {
     return new Result<T>(ResultStatus.NoContent)
   }
-  static Conflict<T = void>(errorMessages: string[] = []): Result<T> {
+  static Conflict<T = null>(errorMessage: string): Result<T> {
     const result = new Result<T>(ResultStatus.Conflict)
-    result._errors = errorMessages
+    result._errorMessage =
+      errorMessage ??
+      'Request was in conflict with the current state of the system.'
 
     return result
   }
-  static CriticalError<T = void>(errorMessages: string[] = []): Result<T> {
+  static CriticalError<T = null>(errorMessage: string): Result<T> {
     const result = new Result<T>(ResultStatus.CriticalError)
-    result._errors = errorMessages
+    result._errorMessage = errorMessage ?? 'An unrecoverable error ocurred.'
 
     return result
   }
-  static Unavailable<T = void>(errorMessages: string[] = []): Result<T> {
+  static Unavailable<T = null>(errorMessage: string): Result<T> {
     const result = new Result<T>(ResultStatus.Unavailable)
-    result._errors = errorMessages
+    result._errorMessage = errorMessage ?? 'Service is currently unavailable.'
 
     return result
   }
@@ -115,52 +120,54 @@ export class Result<T = void> {
     )
   }
 
-  mapTo<U>(fn: (value: T) => U): Result<U> {
-    if (this.isSuccess() && this.value !== undefined) {
-      return Result.Success(fn(this.value as T))
-    }
-
-    return new Result<U>(this.status)
-  }
-
-  toApiResponse(): {
-    status: StatusCode
-    body: { errors: string[] } | T | null | { errors: ValidationError[] }
-    success: boolean
-  } {
+  toApiResponse(): Response {
     switch (this.status) {
       case ResultStatus.Ok:
-        return { status: 200, body: this.value ?? null, success: true }
+        return new Response(this._value ? JSON.stringify(this._value) : null, {
+          status: 200,
+        })
       case ResultStatus.Created:
-        return { status: 201, body: this.value ?? null, success: true }
+        return new Response(this._value ? JSON.stringify(this._value) : null, {
+          status: 201,
+        })
       case ResultStatus.NoContent:
-        return { status: 204, body: null, success: true }
+        return new Response(null, { status: 204 })
       case ResultStatus.Error:
-        return { status: 500, body: { errors: this.errors }, success: false }
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 422,
+        })
       case ResultStatus.Forbidden:
-        return { status: 403, body: { errors: this.errors }, success: false }
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 403,
+        })
       case ResultStatus.Unauthorized:
-        return { status: 401, body: { errors: this.errors }, success: false }
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 401,
+        })
       case ResultStatus.Invalid:
-        return {
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 400,
-          body: { errors: this.validationErrors },
-          success: false,
-        }
+        })
       case ResultStatus.NotFound:
-        return { status: 404, body: { errors: this.errors }, success: false }
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 404,
+        })
       case ResultStatus.Conflict:
-        return { status: 409, body: { errors: this.errors }, success: false }
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 409,
+        })
       case ResultStatus.CriticalError:
-        return { status: 500, body: { errors: this.errors }, success: false }
-      case ResultStatus.Unavailable:
-        return { status: 503, body: { errors: this.errors }, success: false }
-      default:
-        return {
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 500,
-          body: { errors: ['Unknown error'] },
-          success: false,
-        }
+        })
+      case ResultStatus.Unavailable:
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 503,
+        })
+      default:
+        return new Response(JSON.stringify({ message: this._errorMessage }), {
+          status: 500,
+        })
     }
   }
 }

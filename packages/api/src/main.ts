@@ -12,7 +12,7 @@ import { serveStatic } from 'hono/bun'
 //* Dependency building
 const authService = new LuciaAuthService()
 const cryptoService = new CryptoService()
-const mediator = CreateMediator(dbContext, cryptoService)
+const mediator = CreateMediator(dbContext, cryptoService, authService)
 
 //* ----------------Configure api server----------------
 const app = new Hono<Context>()
@@ -21,7 +21,7 @@ const app = new Hono<Context>()
 app.use(SessionCookieMiddleware(authService))
 
 // Configure app routes
-app.route('/app/auth', AppAuthController(mediator, authService))
+app.route('/app/auth', AppAuthController(mediator))
 
 // Configure api routes
 // /api/ routes here...
