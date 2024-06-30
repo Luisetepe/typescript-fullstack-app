@@ -1,10 +1,10 @@
 import type { Context } from '@/context'
 import { AppAuthController } from '@/controllers/app/auth'
 import { env } from '@/env'
+import mediator from '@/features/mediator'
 import { LuciaAuthService } from '@/infrastructure/auth/service'
 import { CryptoService } from '@/infrastructure/crypto/service'
 import { SessionCookieMiddleware } from '@/infrastructure/middlewares/sessionCookie'
-import mediator from '@/mediator'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 
