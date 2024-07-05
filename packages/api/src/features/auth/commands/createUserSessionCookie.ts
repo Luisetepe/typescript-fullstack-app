@@ -1,9 +1,8 @@
-import type { IAuthService } from '@/infrastructure/auth/service'
+import type { Cookie, IAuthService } from '@/infrastructure/auth/service'
 import type { ICryptoService } from '@/infrastructure/crypto/service'
 import type { DbContext } from '@/infrastructure/db/context'
 import { Result } from '@/utils/types/result'
 import { Request } from '@myty/jimmy'
-import type { Cookie } from 'lucia'
 
 export class CreateUserSessionCookieCommand extends Request<
   Promise<Result<Cookie>>

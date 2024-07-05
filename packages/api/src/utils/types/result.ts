@@ -12,8 +12,12 @@ export enum ResultStatus {
   Unavailable,
 }
 
+const jsonHeaders = {
+  'Content-Type': 'application/json; charset=UTF-8',
+}
+
 export type ValidationError = {
-  field: string
+  field?: string
   messages: string[] | string
 }
 
@@ -120,53 +124,88 @@ export class Result<T = null> {
     )
   }
 
-  toApiResponse(): Response {
+  toApiResponse(additionalHeaders?: Record<string, string>): Response {
+    const headers = new Headers(jsonHeaders)
+    for (const [k, v] of Object.entries(additionalHeaders ?? {})) {
+      if (k === 'set-cookie') {
+        headers.append(k, v)
+      } else {
+        headers.set(k, v)
+      }
+    }
+
     switch (this.status) {
       case ResultStatus.Ok:
         return new Response(this._value ? JSON.stringify(this._value) : null, {
           status: 200,
+          headers,
         })
       case ResultStatus.Created:
         return new Response(this._value ? JSON.stringify(this._value) : null, {
           status: 201,
+          headers,
         })
       case ResultStatus.NoContent:
-        return new Response(null, { status: 204 })
+        return new Response(null, {
+          status: 204,
+          headers,
+        })
       case ResultStatus.Error:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 422,
+          headers,
         })
       case ResultStatus.Forbidden:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 403,
+          headers,
         })
       case ResultStatus.Unauthorized:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 401,
+          headers,
         })
       case ResultStatus.Invalid:
-        return new Response(JSON.stringify({ message: this._errorMessage }), {
-          status: 400,
-        })
+        return new Response(
+          JSON.stringify({
+            message: this._errorMessage,
+            errors: this._validationErrors.map((error) =>
+              error.field
+                ? {
+                    [error.field]: error.messages,
+                  }
+                : (error.messages as string)
+            ),
+          }),
+          {
+            status: 400,
+            headers,
+          }
+        )
       case ResultStatus.NotFound:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 404,
+          headers,
         })
       case ResultStatus.Conflict:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 409,
+          headers,
         })
       case ResultStatus.CriticalError:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 500,
+          headers,
         })
       case ResultStatus.Unavailable:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 503,
+          headers,
         })
       default:
         return new Response(JSON.stringify({ message: this._errorMessage }), {
           status: 500,
+          headers,
         })
     }
   }

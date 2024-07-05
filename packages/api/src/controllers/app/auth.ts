@@ -1,7 +1,7 @@
-import { CreateBlankSessionCookieCommand } from '@/features/auth/createBlankSessionCookie'
-import { CreateUserSessionCookieCommand } from '@/features/auth/createUserSessionCookie'
-import { InvalidateUserSessionCommand } from '@/features/auth/invalidateUserSession'
-import { SignUpUserCommand } from '@/features/auth/signUpUser'
+import { CreateBlankSessionCookieCommand } from '@/features/auth/commands/createBlankSessionCookie'
+import { CreateUserSessionCookieCommand } from '@/features/auth/commands/createUserSessionCookie'
+import { InvalidateUserSessionCommand } from '@/features/auth/commands/invalidateUserSession'
+import { SignUpUserCommand } from '@/features/auth/commands/signUpUser'
 import type { Context } from '@/utils/types/context'
 import {
   loginRequestSchema,
@@ -27,11 +27,13 @@ export function AppAuthController(mediator: Mediator) {
       new CreateUserSessionCookieCommand(email, password)
     )
     // Set session cookie if login is successful
-    if (result.isSuccess()) {
-      c.header('Set-Cookie', result.value!.serialize(), {
-        append: true,
-      })
+    if (!result.isSuccess()) {
+      return result.toApiResponse()
     }
+
+    c.header('Set-Cookie', result.value!.serialize(), {
+      append: true,
+    })
 
     return c.body(null, 200)
   })

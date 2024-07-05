@@ -1,25 +1,25 @@
 import {
   CreateBlankSessionCookieCommand,
   CreateBlankSessionCookieCommandHandler,
-} from '@/features/auth/createBlankSessionCookie'
+} from '@/features/auth/commands/createBlankSessionCookie'
 import {
   CreateUserSessionCookieCommand,
   CreateUserSessionCookieCommandHandler,
-} from '@/features/auth/createUserSessionCookie'
+} from '@/features/auth/commands/createUserSessionCookie'
 import {
   InvalidateUserSessionCommand,
   InvalidateUserSessionCommandHandler,
-} from '@/features/auth/invalidateUserSession'
+} from '@/features/auth/commands/invalidateUserSession'
 import {
   SignUpUserCommand,
   SignUpUserCommandHandler,
-} from '@/features/auth/signUpUser'
+} from '@/features/auth/commands/signUpUser'
 import type { IAuthService } from '@/infrastructure/auth/service'
 import type { ICryptoService } from '@/infrastructure/crypto/service'
 import type { DbContext } from '@/infrastructure/db/context'
 import { Mediator } from '@myty/jimmy'
 
-export function CreateMediator(
+export function ApiMediator(
   dbContext: DbContext,
   cryptoService: ICryptoService,
   authService: IAuthService

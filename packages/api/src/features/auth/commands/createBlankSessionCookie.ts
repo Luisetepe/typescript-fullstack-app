@@ -1,7 +1,6 @@
-import type { IAuthService } from '@/infrastructure/auth/service'
+import type { Cookie, IAuthService } from '@/infrastructure/auth/service'
 import { Result } from '@/utils/types/result'
 import { Request } from '@myty/jimmy'
-import type { Cookie } from 'lucia'
 
 export class CreateBlankSessionCookieCommand extends Request<
   Promise<Result<Cookie>>

@@ -8,5 +8,5 @@ const envSchema = z.object({
   DATABASE_URL: z.string(),
 })
 
-export const env = envSchema.parse(process.env)
-export type Env = z.infer<typeof envSchema>
+export const environment = envSchema.parse(process.env)
+export type Environment = z.infer<typeof envSchema>

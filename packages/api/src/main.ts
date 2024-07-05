@@ -1,18 +1,19 @@
 import { AppAuthController } from '@/controllers/app/auth'
-import { env } from '@/env'
-import { CreateMediator } from '@/features/mediator'
+import { environment } from '@/env'
+import { ApiMediator } from '@/features/mediator'
 import { LuciaAuthService } from '@/infrastructure/auth/service'
 import { CryptoService } from '@/infrastructure/crypto/service'
-import { dbContext } from '@/infrastructure/db/context'
+import { AppDbContext } from '@/infrastructure/db/context'
 import { SessionCookieMiddleware } from '@/infrastructure/middlewares/sessionCookie'
 import type { Context } from '@/utils/types/context'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 
 //* Dependency building
-const authService = new LuciaAuthService()
-const cryptoService = new CryptoService()
-const mediator = CreateMediator(dbContext, cryptoService, authService)
+const authService = LuciaAuthService()
+const cryptoService = CryptoService()
+const appDbContext = AppDbContext()
+const mediator = ApiMediator(appDbContext, cryptoService, authService)
 
 //* ----------------Configure api server----------------
 const app = new Hono<Context>()
@@ -31,7 +32,7 @@ app.use('/*', serveStatic({ root: './static' }))
 app.use('*', serveStatic({ path: './static/index.html' }))
 
 export default {
-  port: env.PORT,
+  port: environment.PORT,
   fetch: app.fetch,
 }
 

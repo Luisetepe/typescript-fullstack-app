@@ -1,10 +1,10 @@
-import { env } from '@/env'
+import { environment } from '@/env'
 import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as authSchema from './schema/auth'
 
-export const dbContext = drizzle(postgres(env.DATABASE_URL), {
+const dbContext = drizzle(postgres(environment.DATABASE_URL), {
   schema: { ...authSchema },
 })
 export const authAdapter = new DrizzlePostgreSQLAdapter(
@@ -14,3 +14,7 @@ export const authAdapter = new DrizzlePostgreSQLAdapter(
 )
 
 export type DbContext = typeof dbContext
+
+export function AppDbContext() {
+  return dbContext
+}

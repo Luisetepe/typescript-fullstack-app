@@ -34,7 +34,8 @@
     "**/node_modules": true,
     "**/.idea": true,
     "**/dist": true,
-    "**/build": true
+    "**/build": true,
+    "packages/api/openapi": true
   },
   "files.exclude": {
     "**/.idea": true,
@@ -44,7 +45,8 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
-    "**/node_modules": true
+    "**/node_modules": true,
+    "packages/api/openapi": true
   },
   "files.associations": {
     "*.css": "tailwindcss"

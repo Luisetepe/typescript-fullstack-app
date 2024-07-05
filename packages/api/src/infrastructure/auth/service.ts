@@ -1,4 +1,4 @@
-import type { Cookie, Session, User } from 'lucia'
+import type { CookieAttributes, Session, User } from 'lucia'
 import { luciaAuthClient } from './client'
 
 export interface IAuthService {
@@ -16,27 +16,36 @@ export interface IAuthService {
   invalidateSession(sessionId: string): Promise<void>
 }
 
-export class LuciaAuthService implements IAuthService {
-  validateSession(sessionId: string) {
-    return luciaAuthClient.validateSession(sessionId)
-  }
-  readSessionCookie(cookie: string) {
-    return luciaAuthClient.readSessionCookie(cookie)
-  }
-  createSessionCookie(sessionId: string) {
-    return luciaAuthClient.createSessionCookie(sessionId)
-  }
-  createBlankSessionCookie() {
-    return luciaAuthClient.createBlankSessionCookie()
-  }
-  createSession(
-    userId: string,
-    attributes: Parameters<typeof luciaAuthClient.createSession>[1],
-    options?: Parameters<typeof luciaAuthClient.createSession>[2]
-  ) {
-    return luciaAuthClient.createSession(userId, attributes, options)
-  }
-  invalidateSession(sessionId: string) {
-    return luciaAuthClient.invalidateSession(sessionId)
+export interface Cookie {
+  name: string
+  value: string
+  attributes: CookieAttributes
+  serialize(): string
+}
+
+export function LuciaAuthService(): IAuthService {
+  return {
+    validateSession(sessionId: string) {
+      return luciaAuthClient.validateSession(sessionId)
+    },
+    readSessionCookie(cookie: string) {
+      return luciaAuthClient.readSessionCookie(cookie)
+    },
+    createSessionCookie(sessionId: string) {
+      return luciaAuthClient.createSessionCookie(sessionId)
+    },
+    createBlankSessionCookie() {
+      return luciaAuthClient.createBlankSessionCookie()
+    },
+    createSession(
+      userId: string,
+      attributes: Parameters<typeof luciaAuthClient.createSession>[1],
+      options?: Parameters<typeof luciaAuthClient.createSession>[2]
+    ) {
+      return luciaAuthClient.createSession(userId, attributes, options)
+    },
+    invalidateSession(sessionId: string) {
+      return luciaAuthClient.invalidateSession(sessionId)
+    },
   }
 }

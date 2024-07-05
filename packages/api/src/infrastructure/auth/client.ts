@@ -1,4 +1,4 @@
-import { env } from '@/env'
+import { environment } from '@/env'
 import { authAdapter } from '@/infrastructure/db/context'
 import { Lucia } from 'lucia'
 
@@ -6,7 +6,7 @@ export const luciaAuthClient = new Lucia(authAdapter, {
   sessionCookie: {
     attributes: {
       // set to `true` when using HTTPS
-      secure: env.NODE_ENV === 'production',
+      secure: environment.NODE_ENV === 'production',
       path: '/app',
     },
   },
