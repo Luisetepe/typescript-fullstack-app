@@ -7,36 +7,79 @@ import {
   loginRequestSchema,
   signUpRequestSchema,
 } from '@fullstack-monorepo/lib/contracts/endpoints/app/auth'
+import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { zValidator } from '@hono/zod-validator'
 import type { Mediator } from '@myty/jimmy'
-import { Hono } from 'hono'
 
 export function AppAuthController(mediator: Mediator) {
-  const app = new Hono<Context>()
+  const app = new OpenAPIHono<Context>()
 
   //* POST /app/auth/login
-  app.post('/login', zValidator('json', loginRequestSchema), async (c) => {
-    const currentSession = c.get('session')
-    if (currentSession) {
-      return c.json({ message: 'Already logged in' }, 400)
+  app.openapi(
+    createRoute({
+      tags: ['APP - Auth'],
+      method: 'post',
+      path: '/app/auth/login',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: loginRequestSchema,
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully logged in',
+        },
+        409: {
+          description: 'Trying to login while already logged in',
+          content: {
+            'application/json': {
+              schema: z.object({
+                message: z.string().openapi({ example: 'Already logged in.' }),
+              }),
+            },
+          },
+        },
+        401: {
+          description: 'Invalid credentials',
+          content: {
+            'application/json': {
+              schema: z.object({
+                message: z
+                  .string()
+                  .openapi({ example: 'Invalid user or password.' }),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const currentSession = c.get('session')
+      if (currentSession) {
+        return c.json({ message: 'Already logged in' }, 409)
+      }
+
+      const { email, password } = c.req.valid('json')
+
+      const result = await mediator.send(
+        new CreateUserSessionCookieCommand(email, password)
+      )
+      // Set session cookie if login is successful
+      if (!result.isSuccess()) {
+        return result.toApiResponse()
+      }
+
+      c.header('Set-Cookie', result.value!.serialize(), {
+        append: true,
+      })
+
+      return c.body(null, 200)
     }
-
-    const { email, password } = c.req.valid('json')
-
-    const result = await mediator.send(
-      new CreateUserSessionCookieCommand(email, password)
-    )
-    // Set session cookie if login is successful
-    if (!result.isSuccess()) {
-      return result.toApiResponse()
-    }
-
-    c.header('Set-Cookie', result.value!.serialize(), {
-      append: true,
-    })
-
-    return c.body(null, 200)
-  })
+  )
 
   //* POST /app/auth/signup
   app.post('/signup', zValidator('json', signUpRequestSchema), async (c) => {

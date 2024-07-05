@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@fullstack-monorepo/lib": "workspace:*",
+    "@hono/swagger-ui": "^0.3.0",
+    "@hono/zod-openapi": "^0.14.7",
     "@hono/zod-validator": "^0.2.2",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
     "@myty/jimmy": "^0.6.2",

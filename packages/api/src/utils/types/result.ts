@@ -16,10 +16,12 @@ const jsonHeaders = {
   'Content-Type': 'application/json; charset=UTF-8',
 }
 
-export type ValidationError = {
-  field?: string
-  messages: string[] | string
-}
+export type ValidationError =
+  | {
+      field: string
+      messages: string[]
+    }
+  | string
 
 export class Result<T = null> {
   private _value: T | null
@@ -169,13 +171,7 @@ export class Result<T = null> {
         return new Response(
           JSON.stringify({
             message: this._errorMessage,
-            errors: this._validationErrors.map((error) =>
-              error.field
-                ? {
-                    [error.field]: error.messages,
-                  }
-                : (error.messages as string)
-            ),
+            errors: this._validationErrors,
           }),
           {
             status: 400,
