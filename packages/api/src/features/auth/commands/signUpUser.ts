@@ -31,7 +31,9 @@ export function SignUpUserCommandHandler(
       })
 
       if (!user) {
-        return Result.Invalid([{ field: 'email', messages: 'Invalid email.' }])
+        return Result.Invalid([
+          { field: 'email', messages: ['Email already exists.'] },
+        ])
       }
 
       const passwordHash = await cryptoService.hashPassword(command.password)

@@ -1,6 +1,7 @@
 {
   "name": "@fullstack-monorepo/app",
   "type": "module",
+  "private": true,
   "scripts": {
     "dev": " bun run --bun vite",
     "build": "bun run --bun tsc -b && bun run --bun vite build --emptyOutDir"

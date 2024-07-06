@@ -1,6 +1,7 @@
 {
   "name": "@fullstack-monorepo/api",
   "type": "module",
+  "private": true,
   "scripts": {
     "dev": "bun run --hot src/main.ts",
     "build": "bun run build.ts",

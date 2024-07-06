@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { env } from './env'
+import { environment } from './env'
 
 export default function App() {
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(env.VITE_API_URL + '/hello')
+    fetch(environment.VITE_API_URL + '/hello')
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
   }, [])

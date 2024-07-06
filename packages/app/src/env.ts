@@ -7,5 +7,5 @@ const envSchema = z.object({
   VITE_API_URL: z.string(),
 })
 
-export const env = envSchema.parse(import.meta.env)
-export type Env = z.infer<typeof envSchema>
+export const environment = envSchema.parse(import.meta.env)
+export type Environment = z.infer<typeof envSchema>

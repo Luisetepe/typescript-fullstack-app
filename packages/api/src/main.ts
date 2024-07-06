@@ -1,4 +1,4 @@
-import { AppAuthController } from '@/controllers/app/auth'
+import { AppAuthController } from '@/endpoints/app/authController'
 import { environment } from '@/env'
 import { ApiMediator } from '@/features/mediator'
 import { LuciaAuthService } from '@/infrastructure/auth/service'
@@ -28,10 +28,6 @@ app.route('/app/auth', AppAuthController(mediator))
 // Configure api routes
 // /api/ routes here...
 
-// Configure static file serving for the frontend SPA
-app.use('/*', serveStatic({ root: './static' }))
-app.use('*', serveStatic({ path: './static/index.html' }))
-
 // The OpenAPI documentation will be available at /doc
 app.doc('/openapi', {
   openapi: '3.0.0',
@@ -42,6 +38,10 @@ app.doc('/openapi', {
 })
 // Use the middleware to serve Swagger UI at /ui
 app.get('/swagger', swaggerUI({ url: '/openapi' }))
+
+// Configure static file serving for the frontend SPA
+app.use('/*', serveStatic({ root: './static' }))
+app.use('*', serveStatic({ path: './static/index.html' }))
 
 export default {
   port: environment.PORT,

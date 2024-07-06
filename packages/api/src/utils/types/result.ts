@@ -16,12 +16,10 @@ const jsonHeaders = {
   'Content-Type': 'application/json; charset=UTF-8',
 }
 
-export type ValidationError =
-  | {
-      field: string
-      messages: string[]
-    }
-  | string
+export type ValidationError = {
+  field: string
+  messages: string[]
+}
 
 export class Result<T = null> {
   private _value: T | null
